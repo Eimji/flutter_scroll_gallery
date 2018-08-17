@@ -12,6 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  zoomable_image: '>= 1.2.0'
+  
 dev_dependencies:
   test: ^0.12.0

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:zoomable_image/zoomable_image.dart';
 import 'dart:async';
 
 class ScrollGallery extends StatefulWidget {
@@ -79,9 +80,26 @@ class _ScrollGalleryState extends State<ScrollGallery>
       onPageChanged: _onPageChanged,
       controller: _pageController,
       children: widget.imageProviders.map((image) {
-        return new Image(
-          fit: widget.fit != null ? widget.fit : null,
-          image: image,
+        return new GestureDetector(
+          onTap: () { 
+            Navigator.of(context).push(new MaterialPageRoute<Null>(builder: (BuildContext context) {
+              return new Scaffold(
+                appBar: new AppBar(
+                  title: const Text('Image'),
+                  backgroundColor: new Color(0xFF000000),
+                ),
+                body: new ZoomableImage(
+                  image,
+                  backgroundColor: Colors.black,
+                  placeholder: new Center(child: new CircularProgressIndicator()),
+                ),
+              );
+            }));                      
+          },
+          child: new Image(
+            fit: widget.fit != null ? widget.fit : null,
+            image: image,
+          ),
         );
       }).toList(),
     ));
@@ -134,6 +152,8 @@ class _ScrollGalleryState extends State<ScrollGallery>
         ));
   }
 
+  bool notNull(Object o) => o != null;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -143,9 +163,9 @@ class _ScrollGalleryState extends State<ScrollGallery>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             _buildImagePageView(),
-            _buildImageThumbnail(),
+            widget.imageProviders.length > 1 ? : _buildImageThumbnail() : null,
             new SizedBox(height: 8.0)
-          ],
+          ].where(notNull).toList(),
         ));
   }
 }
