@@ -34,7 +34,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
     _scrollController = new ScrollController();
     _pageController = new PageController();
 
-    if (widget.interval != null) {
+    if (widget.imageProviders.length > 1 && widget.interval != null) {
       _timer = new Timer.periodic(widget.interval, (_) {
         if (_currentIndex == widget.imageProviders.length - 1) {
           _reverse = true;
@@ -158,7 +158,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
   Widget build(BuildContext context) {
     return Container(
         height: widget.height != null ? widget.height : double.infinity,
-        color: Colors.black,
+        color: Colors.white,
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
