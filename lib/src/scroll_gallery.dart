@@ -163,7 +163,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             _buildImagePageView(),
-            widget.imageProviders.length > 1 ? : _buildImageThumbnail() : null,
+            widget.imageProviders.length > 1 ? _buildImageThumbnail() : null,
             new SizedBox(height: 8.0)
           ].where(notNull).toList(),
         ));
