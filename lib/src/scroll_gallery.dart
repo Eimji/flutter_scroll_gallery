@@ -15,7 +15,7 @@ class ScrollGallery extends StatefulWidget {
       this.thumbnailSize : 48.0,
       this.fit,
       this.interval,
-      this.borderColor});
+      this.borderColor : Colors.red});
 
   @override
   _ScrollGalleryState createState() => _ScrollGalleryState();
@@ -99,6 +99,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
           child: new Image(
             fit: widget.fit != null ? widget.fit : null,
             image: image,
+            height: widget.height
           ),
         );
       }).toList(),
@@ -116,54 +117,51 @@ class _ScrollGalleryState extends State<ScrollGallery>
     var _thumbnailSize = widget.thumbnailSize;
 
     return new Container(
-        height: _thumbnailSize,
-        child: new ListView.builder(
-          controller: _scrollController,
-          itemCount: widget.imageProviders.length,
-          scrollDirection: Axis.horizontal,
-          itemBuilder: (BuildContext context, int index) {
-            var _decoration;
-            if (_currentIndex == index) {
-              var _borderColor =
-                  widget.borderColor != null ? widget.borderColor : Colors.red;
-              _decoration = new BoxDecoration(
-                  border: new Border.all(color: _borderColor, width: 2.0),
-                  color: Colors.white);
-            } else {
-              _decoration = new BoxDecoration(color: Colors.white);
-            }
+      height: _thumbnailSize,
+      child: new ListView.builder(
+        controller: _scrollController,
+        itemCount: widget.imageProviders.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (BuildContext context, int index) {
+          var _decoration = new BoxDecoration(
+            border: new Border.all(color: _currentIndex == index ? widget.borderColor : Colors.white, width: 2.0),
+          );
 
-            return new GestureDetector(
-                onTap: () {
-                  _selectImage(index);
-                },
-                child: new Container(
-                  decoration: _decoration,
-                  margin: const EdgeInsets.only(left: 8.0),
-                  child: new Image(
-                    image: widget.imageProviders[index],
-                    fit: BoxFit.cover,
-                    width: _thumbnailSize,
-                    height: _thumbnailSize,
-                  ),
-                ));
-          },
-        ));
+          return new GestureDetector(
+            onTap: () {
+              _selectImage(index);
+            },
+            child: new Container(
+              decoration: _decoration,
+              margin: const EdgeInsets.only(left: 8.0),
+              child: new Image(
+                image: widget.imageProviders[index],
+                fit: BoxFit.cover,
+                width: _thumbnailSize,
+                height: _thumbnailSize,
+              ),
+            ));
+        },
+      ));
   }
 
   bool notNull(Object o) => o != null;
 
   @override
   Widget build(BuildContext context) {
+    double availableHeight = MediaQuery.of(context).size.height;
+    bool displayThumbs = (widget.imageProviders.length > 1 && (availableHeight - widget.height)/2.0 > (widget.thumbnailSize + 20.0)) ? true : false;
     return Container(
-        height: widget.height != null ? widget.height : double.infinity,
+        height: availableHeight,
         color: Colors.white,
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            new SizedBox(height: (availableHeight - widget.height)/2.0),
             _buildImagePageView(),
-            new SizedBox(height: 30.0)
-            (widget.imageProviders.length > 1 && MediaQuery.of(context).size.height > (widget.height + widget.thumbnailSize + 50.0)) ? _buildImageThumbnail() : null,
+            new SizedBox(height: (availableHeight - widget.height)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
+            displayThumbs ? _buildImageThumbnail() : null,
+            displayThumbs ? new SizedBox(height: 10.0) : null,
           ].where(notNull).toList(),
         ));
   }
