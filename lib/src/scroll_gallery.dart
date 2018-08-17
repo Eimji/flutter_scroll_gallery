@@ -11,8 +11,8 @@ class ScrollGallery extends StatefulWidget {
   final Color borderColor;
 
   ScrollGallery(this.imageProviders,
-      {this.height,
-      this.thumbnailSize,
+      {this.height : 250.0,
+      this.thumbnailSize : 48.0,
       this.fit,
       this.interval,
       this.borderColor});
@@ -113,8 +113,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
   }
 
   Widget _buildImageThumbnail() {
-    var _thumbnailSize =
-        widget.thumbnailSize != null ? widget.thumbnailSize : 48.0;
+    var _thumbnailSize = widget.thumbnailSize;
 
     return new Container(
         height: _thumbnailSize,
@@ -163,7 +162,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             _buildImagePageView(),
-            widget.imageProviders.length > 1 ? _buildImageThumbnail() : null,
+            (widget.imageProviders.length > 1 && MediaQuery.of(context).size.height > (widget.height + widget.thumbnailSize + 30.0)) ? _buildImageThumbnail() : null,
             new SizedBox(height: 8.0)
           ].where(notNull).toList(),
         ));
