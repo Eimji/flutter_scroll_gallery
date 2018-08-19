@@ -4,6 +4,7 @@ import 'dart:async';
 
 class ScrollGallery extends StatefulWidget {
   final double height;
+  final double imageHeight;
   final double thumbnailSize;
   final List<ImageProvider> imageProviders;
   final BoxFit fit;
@@ -11,7 +12,9 @@ class ScrollGallery extends StatefulWidget {
   final Color borderColor;
 
   ScrollGallery(this.imageProviders,
-      {this.height : 250.0,
+    {
+      this.height: 400.0,
+      this.imageHeight : 250.0,
       this.thumbnailSize : 48.0,
       this.fit,
       this.interval,
@@ -28,6 +31,8 @@ class _ScrollGalleryState extends State<ScrollGallery>
   Timer _timer;
   int _currentIndex = 0;
   bool _reverse = false;
+
+  int _loading = 0;
 
   @override
   void initState() {
@@ -52,6 +57,16 @@ class _ScrollGalleryState extends State<ScrollGallery>
         }
       });
     }
+
+    widget.imageProviders.forEach((image) =>
+      image.resolve(new ImageConfiguration()).addListener((i, b) {
+        if (mounted) {
+          setState(() {
+            _loading++;
+          });
+        }
+      })
+    );
     
     super.initState();
   }
@@ -99,7 +114,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
           child: new Image(
             fit: widget.fit != null ? widget.fit : null,
             image: image,
-            height: widget.height
+            height: widget.imageHeight
           ),
         );
       }).toList(),
@@ -149,17 +164,24 @@ class _ScrollGalleryState extends State<ScrollGallery>
 
   @override
   Widget build(BuildContext context) {
-    double availableHeight = MediaQuery.of(context).size.height;
-    bool displayThumbs = (widget.imageProviders.length > 1 && (availableHeight - widget.height)/2.0 > (widget.thumbnailSize + 20.0)) ? true : false;
+    double availableHeight = widget.height;
+    bool displayThumbs = (widget.imageProviders.length > 1 && (availableHeight - widget.imageHeight)/2.0 > (widget.thumbnailSize + 20.0)) ? true : false;
     return Container(
         height: availableHeight,
         color: Colors.white,
-        child: new Column(
+        child: _loading != widget.imageProviders.length ? new Center (
+          child: new Container(
+            height: 40.0,
+            width: 40.0,
+            child: new CircularProgressIndicator(),
+          ),
+        ) : 
+        new Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            new SizedBox(height: (availableHeight - widget.height)/2.0),
+            new SizedBox(height: (availableHeight - widget.imageHeight)/2.0),
             _buildImagePageView(),
-            new SizedBox(height: (availableHeight - widget.height)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
+            new SizedBox(height: (availableHeight - widget.imageHeight)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
             displayThumbs ? _buildImageThumbnail() : null,
             displayThumbs ? new SizedBox(height: 10.0) : null,
           ].where(notNull).toList(),
