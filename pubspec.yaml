@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   zoomable_image: 
+    # for SDK >= 2.0
     git: git://github.com/Eimji/flutter_zoomable_image
   
 dev_dependencies:
