@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
+typedef void OnPageChange(int index);
+
 class ScrollGallery extends StatefulWidget {
   final double height;
   final double imageHeight;
@@ -40,12 +42,13 @@ class _ScrollGalleryState extends State<ScrollGallery>
   int _currentIndex = 0;
   bool _reverse = false;
   bool _lock = false;
+
   int _loading = 0;
 
   @override
   void initState() {
     _scrollController = new ScrollController();
-    _pageController = new PageController();
+    _pageController = new PageController(initialPage: widget.initialIndex);
     _currentIndex = widget.initialIndex;
     if (widget.interval != null && widget.imageProviders.length > 1) {
       _timer = new Timer.periodic(widget.interval, (_) {
@@ -97,8 +100,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
     }
     setState(() {
       _currentIndex = index;
-      double itemSize =
-          (widget.thumbnailSize != null ? widget.thumbnailSize : 48.0) + 8.0;
+      double itemSize = widget.thumbnailSize + 8.0;
       _scrollController?.animateTo(itemSize * index / 2,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     });
@@ -117,13 +119,14 @@ class _ScrollGalleryState extends State<ScrollGallery>
     );
   }
 
-   Widget _notZoomableImage(image) {
+  Widget _notZoomableImage(image) {
     return new Image(image: image, fit: widget.fit, height: widget.imageHeight);
   }
 
   Widget _buildImagePageView() {
     return Expanded(
         child: new PageView(
+      physics: _lock ? NeverScrollableScrollPhysics() : null,
       onPageChanged: _onPageChanged,
       controller: _pageController,
       children: widget.imageProviders.map((image) {
@@ -180,24 +183,25 @@ class _ScrollGalleryState extends State<ScrollGallery>
     double availableHeight = widget.height;
     bool displayThumbs = (widget.imageProviders.length > 1 && (availableHeight - widget.imageHeight)/2.0 > (widget.thumbnailSize + 20.0)) ? true : false;
     return Container(
-        height: availableHeight,
-        color: Colors.white,
-        child: _loading != widget.imageProviders.length ? new Center (
-          child: new Container(
-            height: 40.0,
-            width: 40.0,
-            child: new CircularProgressIndicator(),
-          ),
-        ) : 
-        new Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            new SizedBox(height: (availableHeight - widget.imageHeight)/2.0),
-            _buildImagePageView(),
-            new SizedBox(height: (availableHeight - widget.imageHeight)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
-            displayThumbs ? _buildImageThumbnail() : null,
-            displayThumbs ? new SizedBox(height: 10.0) : null,
-          ].where(notNull).toList(),
-        ));
+      height: availableHeight,
+      color: Colors.white,
+      child: _loading != widget.imageProviders.length ? new Center (
+        child: new Container(
+          height: 40.0,
+          width: 40.0,
+          child: new CircularProgressIndicator(),
+        ),
+      ) : 
+      new Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          new SizedBox(height: (availableHeight - widget.imageHeight)/2.0),
+          _buildImagePageView(),
+          new SizedBox(height: (availableHeight - widget.imageHeight)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
+          displayThumbs ? _buildImageThumbnail() : null,
+          displayThumbs ? new SizedBox(height: 10.0) : null,
+        ].where(notNull).toList(),
+      ),
+    );
   }
 }
