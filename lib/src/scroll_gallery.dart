@@ -45,30 +45,32 @@ class _ScrollGalleryState extends State<ScrollGallery>
 
   @override
   void initState() {
-    _scrollController = new ScrollController();
-    _pageController = new PageController(initialPage: widget.initialIndex);
-    _currentIndex = widget.initialIndex;
-    if (widget.interval != null && widget.imageProviders.length > 1) {
-      _timer = new Timer.periodic(widget.interval, (_) {
-       if (_lock) {
-          return;
-        }
+    if (widget.imageProviders.length > 1) {
+      _scrollController = new ScrollController();
+      _pageController = new PageController(initialPage: widget.initialIndex);
+      _currentIndex = widget.initialIndex;
+      if (widget.interval != null) {
+        _timer = new Timer.periodic(widget.interval, (_) {
+         if (_lock) {
+            return;
+          }
 
-        if (_currentIndex == widget.imageProviders.length - 1) {
-          _reverse = true;
-        }
-        if (_currentIndex == 0) {
-          _reverse = false;
-        }
+          if (_currentIndex == widget.imageProviders.length - 1) {
+            _reverse = true;
+          }
+          if (_currentIndex == 0) {
+            _reverse = false;
+          }
 
-        if (_reverse) {
-          _pageController?.previousPage(
-              duration: const Duration(milliseconds: 500), curve: Curves.ease);
-        } else {
-          _pageController?.nextPage(
-              duration: const Duration(milliseconds: 500), curve: Curves.ease);
-        }
-      });
+          if (_reverse) {
+            _pageController?.previousPage(
+                duration: const Duration(milliseconds: 500), curve: Curves.ease);
+          } else {
+            _pageController?.nextPage(
+                duration: const Duration(milliseconds: 500), curve: Curves.ease);
+          }
+        });
+      }
     }
 
     widget.imageProviders.forEach((image) =>
@@ -122,8 +124,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
   }
 
   Widget _buildImagePageView() {
-    return Expanded(
-        child: new PageView(
+    return new PageView(
       physics: _lock ? NeverScrollableScrollPhysics() : null,
       onPageChanged: _onPageChanged,
       controller: _pageController,
@@ -132,7 +133,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
             ? _zoomableImage(image)
             : _notZoomableImage(image);
       }).toList(),
-    ));
+    );
   }
 
   void _selectImage(int index) {
@@ -190,14 +191,18 @@ class _ScrollGalleryState extends State<ScrollGallery>
           child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(widget.borderColor)),
         ),
       ) : 
-      new Column(
+      (widget.imageProviders.length > 1 ? new Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          _buildImagePageView(),
+          new Expanded(
+            child: _buildImagePageView(),
+          ),
           new SizedBox(height: 10.0),
           _buildImageThumbnail(),
           new SizedBox(height: 10.0),
         ],
+      ) : 
+      new Center(child: _buildImagePageView())
       ),
     );
   }
