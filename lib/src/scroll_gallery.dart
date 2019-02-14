@@ -6,7 +6,6 @@ typedef void OnPageChange(int index);
 
 class ScrollGallery extends StatefulWidget {
   final double height;
-  final double imageHeight;
   final double thumbnailSize;
   final List<ImageProvider> imageProviders;
   final BoxFit fit;
@@ -19,11 +18,10 @@ class ScrollGallery extends StatefulWidget {
 
   ScrollGallery(this.imageProviders,
     {
-      this.height = 400.0,
-      this.imageHeight = 250.0,
+      this.height = double.infinity,
       this.thumbnailSize = 48.0,
       this.borderColor = Colors.red,
-      this.backgroundColor = Colors.black,
+      this.backgroundColor = Colors.white,
       this.zoomable = true,
       this.fit = BoxFit.contain,
       this.interval,
@@ -100,7 +98,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
     }
     setState(() {
       _currentIndex = index;
-      double itemSize = (widget.thumbnailSize != null ? widget.thumbnailSize : 48.0) + 8.0;
+      double itemSize = widget.thumbnailSize + 8.0;
       _scrollController?.animateTo(itemSize * index / 2,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     });
@@ -120,7 +118,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
   }
 
   Widget _notZoomableImage(image) {
-    return new Image(image: image, fit: widget.fit, height: widget.imageHeight);
+    return new Image(image: image, fit: widget.fit);
   }
 
   Widget _buildImagePageView() {
@@ -130,7 +128,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
       onPageChanged: _onPageChanged,
       controller: _pageController,
       children: widget.imageProviders.map((image) {
-        return widget.zoomable ?
+        return widget.zoomable
             ? _zoomableImage(image)
             : _notZoomableImage(image);
       }).toList(),
@@ -153,16 +151,20 @@ class _ScrollGalleryState extends State<ScrollGallery>
         itemCount: widget.imageProviders.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (BuildContext context, int index) {
-          var _decoration = new BoxDecoration(
-            border: new Border.all(color: _currentIndex == index ? widget.borderColor : Colors.white, width: 2.0),
-          );
+          var decoration = new BoxDecoration(color: Colors.white);
+
+          if (_currentIndex == index) {
+            decoration = new BoxDecoration(
+                border: new Border.all(color: widget.borderColor, width: 2.0),
+                color: Colors.white);
+          }
 
           return new GestureDetector(
             onTap: () {
               _selectImage(index);
             },
             child: new Container(
-              decoration: _decoration,
+              decoration: decoration,
               margin: const EdgeInsets.only(left: 8.0),
               child: new Image(
                 image: widget.imageProviders[index],
@@ -176,31 +178,26 @@ class _ScrollGalleryState extends State<ScrollGallery>
       ));
   }
 
-  bool notNull(Object o) => o != null;
-
   @override
   Widget build(BuildContext context) {
-    double availableHeight = widget.height;
-    bool displayThumbs = (widget.imageProviders.length > 1 && (availableHeight - widget.imageHeight)/2.0 > (widget.thumbnailSize + 20.0)) ? true : false;
     return Container(
-      height: availableHeight,
-      color: Colors.white,
+      height: widget.height,
+      color: widget.backgroundColor,
       child: _loading != widget.imageProviders.length ? new Center (
         child: new Container(
           height: 40.0,
           width: 40.0,
-          child: new CircularProgressIndicator(),
+          child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(widget.borderColor)),
         ),
       ) : 
       new Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          new SizedBox(height: (availableHeight - widget.imageHeight)/2.0),
           _buildImagePageView(),
-          new SizedBox(height: (availableHeight - widget.imageHeight)/2.0 - (displayThumbs ? (widget.thumbnailSize + 10.0) : 0)),
-          displayThumbs ? _buildImageThumbnail() : null,
-          displayThumbs ? new SizedBox(height: 10.0) : null,
-        ].where(notNull).toList(),
+          new SizedBox(height: 10.0),
+          _buildImageThumbnail(),
+          new SizedBox(height: 10.0),
+        ],
       ),
     );
   }
