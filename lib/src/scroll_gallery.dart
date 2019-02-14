@@ -100,7 +100,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
     }
     setState(() {
       _currentIndex = index;
-      double itemSize = widget.thumbnailSize + 8.0;
+      double itemSize = (widget.thumbnailSize != null ? widget.thumbnailSize : 48.0) + 8.0;
       _scrollController?.animateTo(itemSize * index / 2,
           duration: const Duration(milliseconds: 200), curve: Curves.ease);
     });
