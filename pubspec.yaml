@@ -12,9 +12,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  zoomable_image: 
-    # for SDK >= 2.0
-    git: git://github.com/Eimji/flutter_zoomable_image
+  photo_view:
   
 dev_dependencies:
   test: ^0.12.0
