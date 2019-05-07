@@ -41,8 +41,6 @@ class _ScrollGalleryState extends State<ScrollGallery>
   bool _reverse = false;
   bool _lock = false;
 
-  int _loading = 0;
-
   @override
   void initState() {
     if (widget.imageProviders.length > 1) {
@@ -72,16 +70,6 @@ class _ScrollGalleryState extends State<ScrollGallery>
         });
       }
     }
-
-    widget.imageProviders.forEach((image) =>
-      image.resolve(new ImageConfiguration()).addListener((i, b) {
-        if (mounted) {
-          setState(() {
-            _loading++;
-          });
-        }
-      })
-    );
     
     super.initState();
   }
@@ -184,14 +172,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
     return Container(
       height: widget.height,
       color: widget.backgroundColor,
-      child: _loading != widget.imageProviders.length ? new Center (
-        child: new Container(
-          height: 40.0,
-          width: 40.0,
-          child: new CircularProgressIndicator(valueColor: new AlwaysStoppedAnimation<Color>(widget.borderColor)),
-        ),
-      ) : 
-      (widget.imageProviders.length > 1 ? new Column(
+      child: widget.imageProviders.length > 1 ? new Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           new Expanded(
@@ -202,8 +183,7 @@ class _ScrollGalleryState extends State<ScrollGallery>
           new SizedBox(height: 10.0),
         ],
       ) : 
-      new Center(child: _buildImagePageView())
-      ),
+      new Center(child: _buildImagePageView()),
     );
   }
 }
